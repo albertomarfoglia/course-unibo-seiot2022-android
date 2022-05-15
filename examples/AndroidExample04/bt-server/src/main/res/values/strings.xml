@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Bluetooth Chat - Server</string>
+    <string name="start_bluetooth_server_button_label">START BLUETOOTH SERVER</string>
+    <string name="send_button_label">SEND</string>
+    <string name="chat_history_text_label">CHAT HISTORY</string>
+    <string name="status_text_label_default">Status : not connected</string>
+    <string name="server_started_text">Status : server started...</string>
+    <string name="client_connected_text">Status : client connected</string>
+</resources>

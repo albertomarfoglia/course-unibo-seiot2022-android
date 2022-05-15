@@ -1,0 +1,134 @@
+\mode<presentation>{
+	%\usetheme{CambridgeUS}
+	%\usecolortheme{seahorse}
+	\usetheme{Boadilla}
+	\usecolortheme{beaver}
+	\setbeamertemplate{navigation symbols}{}
+}
+
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{algpseudocode}
+\usepackage{hyperref}
+\usepackage{tikz}
+\usepackage[utf8]{inputenc}
+\usepackage{listings}
+\usepackage[export]{adjustbox}
+\usepackage{aeguill}
+
+%\setbeamertemplate{title page}[default][rounded=false]
+
+\setbeamertemplate{title page}
+{
+%\vbox{}
+\begingroup
+\centering
+\begin{beamercolorbox}[sep=8pt,center]{institute}
+\usebeamerfont{institute}\insertinstitute
+\end{beamercolorbox}
+\vskip1em%
+\begin{beamercolorbox}[sep=8pt,center]{title}
+\usebeamerfont{title}\inserttitle\par%
+\ifx\insertsubtitle\@empty%
+\else%
+\vskip0.25em%
+{\usebeamerfont{subtitle}\usebeamercolor[fg]{subtitle}\insertsubtitle\par}%
+\fi%
+\end{beamercolorbox}%
+\vfill
+\begin{beamercolorbox}[sep=8pt,center]{author}
+\usebeamerfont{author}\insertauthor
+\end{beamercolorbox}
+\vskip1em\par
+\begin{beamercolorbox}[sep=8pt,center]{date}
+\usebeamerfont{date}{\footnotesize \insertdate}
+\end{beamercolorbox}
+\endgroup
+}
+
+\setbeamertemplate{blocks}[default]
+\setbeamercolor{structure}{fg=darkred}
+%\setbeamercolor{block title}{bg=darkred,fg=white}
+%\setbeamercolor{block body}{bg=darkgray!20!white}
+\setbeamercolor{block title}{bg=darkgray!30!white}
+\setbeamertemplate{enumerate items}[default]
+
+\setbeamertemplate{part page}{
+\begin{beamercolorbox}[sep=8pt,center,wd=\textwidth]{part title}
+\usebeamerfont{part title}\insertpart\par
+\end{beamercolorbox}
+\vfill
+\tableofcontents
+}
+
+%\setbeamertemplate{frametitle continuation}{(\insertcontinuationcount)}
+
+\setbeamertemplate{headline}{\leavevmode\hbox{\begin{beamercolorbox}[wd=.5\paperwidth,ht=2.65ex,dp=1.5ex,center]{section in head/foot}\usebeamerfont{section in head/foot}\insertsectionhead\hspace*{2ex}
+\end{beamercolorbox}\begin{beamercolorbox}[wd=.5\paperwidth,ht=2.65ex,dp=1.5ex,center]{subsection in head/foot}\usebeamerfont{subsection in head/foot}\hspace*{2ex}\insertsubsectionhead\end{beamercolorbox}}\vskip0pt}
+
+\setbeamertemplate{background}{\tikz[overlay,remember picture]\node[opacity=0.08]at (current page.south east){\includegraphics[width=10cm]{figures/unibo_logo.jpg}};}
+
+\newcommand{\tcc}[1]{\textcolor{darkred}{#1}}
+
+\newcommand{\codeA}[1]{\texttt{#1}}
+\newcommand{\codeB}[1]{\texttt{\textcolor{darkred}{#1}}}
+
+\newcommand{\link}[1]{{\footnotesize » \url{#1}}}
+\newcommand{\bothquote}[1]{``#1''}
+
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+\definecolor{maroon}{rgb}{0.5,0,0}
+\definecolor{darkgreen}{rgb}{0,0.5,0}
+
+\setbeamercolor*{bibliography entry title}{fg=black}
+\setbeamercolor*{bibliography entry author}{fg=black}
+\setbeamercolor*{bibliography entry location}{fg=black}
+\setbeamercolor*{bibliography entry note}{fg=black}
+
+\lstset{
+language=Java,
+basicstyle=\scriptsize\ttfamily,
+keywordstyle=\scriptsize\color{blue}\ttfamily,
+commentstyle=\scriptsize\color{mygreen}\ttfamily,
+breakatwhitespace=false,
+breaklines=true,
+ numbers=left,
+  numberstyle=\color{mymauve},
+  stringstyle=\color{mymauve},
+  showstringspaces=false,
+  numbers=none
+}
+
+\lstdefinelanguage{XML}
+{
+  basicstyle=\scriptsize\ttfamily,
+  morestring=[s]{"}{"},
+  morecomment=[s]{?}{?},
+  morecomment=[s]{!--}{--},
+  commentstyle=\color{darkgreen},
+  moredelim=[s][\color{black}]{>}{<},
+  moredelim=[s][\color{red}]{\ }{=},
+  stringstyle=\color{blue},
+  identifierstyle=\color{maroon},
+  numbers=none
+}
+
+\makeatother
+
+%\AtBeginSection[]
+%{
+%  \begin{frame}
+%    \frametitle{Outline}
+%    \tableofcontents[currentsection]
+%  \end{frame}
+%}
+
+%\AtBeginSubsection[]
+%{
+%  \begin{frame}
+%    \frametitle{Outline}
+%    \tableofcontents[currentsection,currentsubsection]
+%  \end{frame}
+%}

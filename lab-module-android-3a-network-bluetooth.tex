@@ -1,0 +1,794 @@
+\documentclass{beamer}
+
+\input{style/ancro-slide-format}
+
+\title[Android -- 3A -- HTTP, Bluetooth]{Android Programming}
+\subtitle{HTTP and Bluetooth communication}
+\date[ver. 1.0 (20220505)]{Embedded Systems and Internet of Things\\A.A. 2021 -- 2022}
+
+\begin{document}
+
+  \begin{frame}
+    \titlepage
+  \end{frame}
+
+  \input{style/thanks-frame.tex}
+
+  \section{HTTP Communication}
+
+  \subsection{HTTP Requests}
+
+  \begin{frame}[fragile]{HTTP requests}
+    \begin{block}{Overview}
+      \begin{itemize}
+        \item The Java HTTP client (\codeB{java.net.HttpURLConnection})
+        facilitates the HTTP requests creation (GET, POST, PUT, DELETE).
+        \item Alternatively, Android suggests using the \tcc{Volley} library. 
+        \begin{itemize}
+          \item \url{https://developer.android.com/training/volley}
+        \end{itemize}
+      \end{itemize}
+    \end{block}
+
+    \begin{exampleblock}{Permissions}
+      \begin{lstlisting}[language=XML]
+  <uses-permission android:name="android.permission.INTERNET"/>
+  <uses-permission
+    android:name="android.permission.ACCESS_NETWORK_STATE"/>
+      \end{lstlisting}
+    \end{exampleblock}
+
+    {\small \textbf{Note} -- Since Android 9.0 (API Level 28), to execute not
+    encrypted requests via network, you must specify the
+    \codeB{android:usesCleartextTraffic="true"} attribute in the
+    \codeB{<application>} field of the manifest file.}  
+
+  \end{frame}
+
+  \begin{frame}[fragile]{Examples}
+    \begin{exampleblock}{GET Request}
+      \begin{lstlisting}[language=Java]
+String doGet(URL url) {
+  HttpURLConnection c = (HttpURLConnection) url.openConnection();
+  c.setRequestMethod("GET");
+  if(c.getResponseCode() == HttpURLConnection.HTTP_OK)
+    return readStream(c.getInputStream());
+}
+      \end{lstlisting}
+    \end{exampleblock}
+
+    \begin{exampleblock}{POST Request}
+      \begin{lstlisting}[language=Java]
+String doPost(URL url, byte[] payload) {
+  HttpURLConnection c = (HttpURLConnection) url.openConnection();
+  c.setRequestMethod("POST");
+  c.setDoOutput(true);
+  c.getOutputStream().write(payload);
+  if(c.getResponseCode() == HttpURLConnection.HTTP_OK)
+    return readStream(c.getInputStream());
+}
+      \end{lstlisting}
+    \end{exampleblock}
+  \end{frame}
+
+  \begin{frame}{HTTP requests -- notes}
+    \begin{block}{Some notes}
+      \begin{itemize}\itemsep20pt
+        \item You cannot make HTTP requests on the Main Thread 
+        \begin{itemize}
+          \item They must be delegated to a Worker thread (ex. via AsyncTask)
+        \end{itemize}
+        \item \textbf{HTTP requests are intrinsically asynchronous} 
+      \begin{itemize}
+        \item The response, if any, can arrive after a certain amount of time
+        \item During this time, a timeout may be triggered which signals the
+        unavailability of the server or network.
+      \end{itemize}
+      \end{itemize}
+    \end{block}
+  \end{frame}
+
+\subsection{Verify Connectivity}
+
+  \begin{frame}[fragile]{Verify connectivity}
+    \begin{block}{Connectivity manager}
+      \begin{itemize}\itemsep20pt
+        \item The \codeB{ConnectivityManager} service allows you to check if the
+        device is connected to the Internet or not.
+      \end{itemize}
+    \end{block}
+    \begin{exampleblock}{Example}
+      \begin{lstlisting}[language=Java]
+ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+
+if(activeNetwork.isConnectedOrConnecting()) {
+  /* Network is reachable... */
+}
+      \end{lstlisting}
+    \end{exampleblock}
+  \end{frame}
+
+
+\section{Bluetooth Communication}
+
+  \begin{frame}{Bluetooth in Android}
+    \begin{block}{Overview}
+      \begin{itemize}\itemsep10pt
+        \item Android, already from the first versions of the system, includes
+        support for the communication stack based on the Bluetooth standard.
+        \begin{itemize}
+          \item Through the Android Bluetooth API
+          \item Both point-to-point and multipoint BT connections are enabled. 
+        \end{itemize}
+        \item In particular, in Android it's possible to:
+        \begin{itemize}
+          \item Analyze the radio frequencies to identify other nearby devices
+          (\tcc{discovery})
+          \item Connect to previously paired devices (\tcc{pairing})
+          \item Transfer data from one device to another via the BT stack
+          \item Manage multiple connections
+        \end{itemize}
+      \end{itemize}
+    \end{block}
+  \end{frame}
+
+\subsection{API and Permissions}
+
+  \begin{frame}{Android Bluetooth API}
+    \begin{block}{API summary}
+      \begin{itemize}\itemsep10pt
+        \item All the Android Bluetooth API are provided through the
+        \codeB{android.bluetooth.*} package.
+        \item Among others, the most significant are:
+        \begin{itemize}\itemsep10pt
+          \item \tcc{BluetoothAdapter}: represents the entry-point for every
+          interaction based on bluetooth.
+          \item \tcc{BluetoothDevice}: represents a remote bluetooth device with
+          which an appropriate communication channel has been established.
+          \item \tcc{BluetoothSocket} and \tcc{BluetoothServerSocket}: defines the
+          bluetooth interfaces to activate TCP-like communication channels. 
+        \end{itemize}
+      \end{itemize}
+    \end{block}
+  \end{frame}
+
+  \begin{frame}[fragile]{Permissions}
+    \begin{block}{Some notes}
+      \begin{itemize}
+        \item To use the Bluetooth support offered by the operating system, it is
+        necessary to request the relative permissions (\codeB{BLUETOOTH} and
+        \codeB{BLUETOOTH\_ADMIN}), declaring them in the File Manifest.
+        \item From Android 6.0 onwards it necessary to request an additional permission 
+        (\codeB{ACCESS\_FINE\_LOCATION})
+        \begin{itemize}
+          \item This is a \bothquote{dangerous} permission (user confirmation
+          required). 
+        \end{itemize}
+      \end{itemize}
+    \end{block}
+
+  \begin{exampleblock}{BT permissions}
+    \begin{lstlisting}[language=XML]
+<uses-permission android:name="android.permission.BLUETOOTH"/>
+<uses-permission
+  android:name="android.permission.BLUETOOTH_ADMIN"/>
+<!-- Necessary for device with Android 6.0 or higher --> 
+<uses-permission
+  android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    \end{lstlisting}
+  \end{exampleblock}
+
+
+\end{frame}
+
+\subsection{Initialization}
+
+  \begin{frame}[fragile,allowframebreaks]{Bluetooth Initialization}
+    \begin{block}{BluetoothAdaper}
+      \begin{itemize}
+        \item Through the instance of the default BluetoothAdapter provided by the
+        system it is possible: 
+        \begin{enumerate}
+          \item Check if Bluetooth stack based communication is available for the
+          specific device
+          \item Request the user to enable it if bluetooth support is available
+          but temporarily disabled.
+        \end{enumerate}
+      \end{itemize}
+    \end{block}
+    \begin{exampleblock}{1. Check Bluetooth availability}
+      \begin{lstlisting}[language=Java]
+BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
+if(btAdapter == null) { /* Bluetooth is not supported */ }
+      \end{lstlisting}
+    \end{exampleblock}
+    \begin{small}
+    \textit{Note} -- The \codeB{getDefaultAdapter()} method returns the only
+    BluetoothAdapter instance shared with the whole system.
+    \end{small}
+    \begin{exampleblock}{2. Request to enable the BT}
+    \begin{lstlisting}[language=Java]
+final int REQUEST_ENABLE_BT = 1;
+
+if (!btAdapter.isEnabled()) {
+  Intent i = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+  startActivityForResult(i, REQUEST_ENABLE_BT);
+}
+    \end{lstlisting}
+    \end{exampleblock}
+    \begin{itemize}
+      \item If the BT is not enabled, through a specific Intent it is possible
+      to request the enabling of the BT to the system.
+      \begin{itemize}
+        \item Enabling must necessarily pass through an explicit authorization
+        from the user.
+      \end{itemize}
+      \item The intent can be executed by using the
+      \codeB{startActivityForResult()} method, whose \textit{response} (eventual
+      confirmation of enabling) can be intercepted by implementing the
+      appropriate callback (\codeB{onActivityResult()}) on the affected
+      activity.
+    \end{itemize}
+
+    \begin{exampleblock}{Example -- BT Initilization}
+      \begin{lstlisting}[language=Java]
+public class MyActivity extends Activity{
+  private BluetoothAdapter btAdapter;
+  private final int ENABLE_BT_REQ = 1;
+
+  @Override 
+  protected void onCreate(Bundle savedInstanceState){
+    super.onCreate(savedInstanceState);
+
+    /* ... */
+
+    btAdapter = BluetoothAdapter.getDefaultAdapter();
+    
+    if(btAdapter == null){
+      Log.e("MyApp","BT is not available on this device");
+      finish();
+    }
+      \end{lstlisting}
+    \end{exampleblock}		
+    \begin{exampleblock}{\vspace{-10pt}}
+      \begin{lstlisting}[language=Java]
+    if (!btAdapter.isEnabled()){
+      startActivityForResult(
+        new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE),
+        ENABLE_BT_REQ);
+    }
+  }
+  
+  @Override
+  public void onActivityResult(int reqID, int res, Intent data){
+    if(reqID == ENABLE_BT_REQ && res == Activity.RESULT_OK){
+      //BT enabled
+    }
+        
+    if(reqID == ENABLE_BT_REQ && res == Activity.RESULT_CANCELED){
+      //BT enabling process aborted
+    }
+  }
+}
+      \end{lstlisting}
+    \end{exampleblock}
+  \end{frame}
+
+\subsection{Devices Discovery}
+
+  \begin{frame}[allowframebreaks]{Search for nearby devices}
+    \begin{itemize}
+      \item The search and identification of devices to which to connect can be
+      done in two different ways:
+      \begin{itemize}
+        \item Connect to unknown devices (\tcc{device discovery})
+        \item Connect to previously \tcc{paired} devices
+      \end{itemize}
+    \end{itemize}
+
+    \begin{block}{Device Discovery}
+      \begin{itemize}
+        \item It's a Bluetooth frequency scanning procedure that allows you to
+        identify any devices present in the range of visibility
+        \item All devices that are visible to others can be identified
+        \item The identified devices respond by sharing some information (MAC,
+        Address, Device Name, \dots)
+        \item In order to activate the connection with one of the identified
+        devices, the pairing operation must be performed
+      \end{itemize}
+    \end{block}
+
+    \begin{block}{Pairing}
+      \begin{itemize}\itemsep5pt
+        \item It's a procedure for pairing two bluetooth devices, performed by
+        the user.
+        \item It allows you to store on each device all the information
+        necessary to activate a connection between the two.
+        \item The fact that two devices are paired does not mean that they are
+        connected to each other and can exchange data on a dedicated RFCOMM
+        channel.
+        \item The coupling is a necessary but not sufficient condition to allow
+        the transmission of data on the BT channel from one device to another.
+      \end{itemize}
+    \end{block}
+  \end{frame}
+
+
+
+  \begin{frame}[fragile]{Paired Devices List}
+    \begin{itemize}
+      \item The list of previously paired devices can be obtained using the
+      \codeB{getBondedDevices()} function that can be run on the
+      BluetoothAdapter instance.
+      \begin{itemize}
+        \item Returns a \codeB{Set} of \codeB{BluetoothDevice} objects 
+      \end{itemize}
+    \end{itemize}
+
+    \begin{exampleblock}{Example - Paired devices List}
+      \begin{lstlisting}[language=Java]
+String BT_TARGET_NAME = "mario-Phone";
+BluetoothDevice targetDevice = null;
+Set<BluetoothDevice> pairedList = btAdapter.getBondedDevices();
+
+if(pairedList.size() > 0){
+  for(BluetoothDevice device : pairedList){
+    if(device.getName() == BT_TARGET_NAME)
+      targetDevice = device;
+  }
+}
+      \end{lstlisting}
+    \end{exampleblock}
+  \end{frame}
+
+  \begin{frame}[fragile,allowframebreaks]{Discovery Mechanism}
+    \begin{block}{Guidelines}
+      \begin{itemize}\itemsep10pt
+        \item Through the BluetoothAdapter instance it is possible to start and
+        stop the discovery procedure of other devices within the range of
+        visibility.
+        \begin{itemize}
+          \item Respectively calling the \codeB{startDiscovery()} and
+          \codeB{cancelDiscovery()} methods.
+        \end{itemize}
+        \item The discovery procedure lasts about 12 seconds and scans the
+        Bluetooth frequencies.
+        \item In order to receive the information of the identified devices, it
+        necessary to register a \tcc{BroadcastReceiver} enabled to intercept each
+        \codeB{BluetoothDevice.ACTION\_FOUND} \codeA{IntentFilter}
+        \item This is a very energy intensive (battery) procedure.
+      \end{itemize}
+    \end{block}
+    
+    \begin{exampleblock}{Example - Discovery of nearby devices}
+      \begin{lstlisting}[language=Java]
+public class MyActivity extends Activity {
+  private BluetoothAdapter btAdapter;
+  private Set<BluetoothDevice> nbDevices = null;
+
+  private final BroadcastReceiver br = new BroadcastReceiver() {
+    @Override
+    public void onReceive(Context context, Intent intent) {
+      BluetoothDevice device = null;
+      
+      if(BluetoothDevice.ACTION_FOUND.equals(intent.getAction())) {
+        device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+        nbDevices.add(device);
+      }
+    }
+  };
+      \end{lstlisting}
+    \end{exampleblock}		
+    \begin{exampleblock}{\vspace{-10pt}}
+      \begin{lstlisting}[language=Java]
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+  super.onCreate(savedInstanceState);
+  setContentView(/* ... */);
+
+  btAdapter = BluetoothAdapter.getDefaultAdapter();
+
+  /* Initialize BT ... */
+  
+  registerReceiver(br, new IntentFilter(BluetoothDevice.ACTION_FOUND));
+}
+
+@Override
+public void onStart() {
+  super.onStart();
+  btAdapter.startDiscovery();
+}
+      \end{lstlisting}
+    \end{exampleblock}		
+    \begin{exampleblock}{\vspace{-10pt}}
+      \begin{lstlisting}[language=Java]
+  @Override
+  public void onStop() {
+    super.onStop();
+    btAdapter.cancelDiscovery();
+  }
+}
+      \end{lstlisting}
+    \end{exampleblock}
+    \begin{small}
+      \begin{block}{Some notes}
+        \textit{Note (1).} The BroadcastReceiver must be registered in the system
+        (using \codeB{registerReceiver()} specifying the IntentFilter enabled to receive).
+        \newline\newline
+        \textit{Note (2).} To the onReceive method of the BR, the identified device
+        is passed through an Intent, from which it is possible to retrieve the
+        instance of the device using the \codeB{getParcelableExtra()} function with the
+        specific parameter.
+      \end{block}
+    \end{small}
+  \end{frame}
+  
+\subsection{RFCOMM and UUID}
+
+  \begin{frame}[allowframebreaks]{Creation of the communication channel}
+    % \begin{itemize}
+    %   \item It follows the same Client-Server scheme of the communication
+    %   channels based on the TCP-IP protocol via socket.
+    %   \item A communication channel based on the RFCOMM standard.
+    % \end{itemize}
+    % \vspace{10pt}
+    \begin{block}{Server Side}
+      \begin{enumerate}
+        \item A Thread (\codeA{MasterThread}) is activated which creates a
+        serverSocket that waits for connection requests (blocking call of the
+        \codeB{accept()} method).
+        \begin{itemize}
+          \item The serverSocket can be obtained from the BluetoothAdapter using
+          the \codeB{listenUsingRfcommWithServiceRecord()} functionality to which a
+          generic name for the channel and the UUID must be passed.
+        \end{itemize}
+        \item When the serverSocket receives a connection request, it returns
+        the specific socket on which the channel was activated.
+        \item This socket is then passed to the instance of a bluetooth
+        connection manager (\codeA{ConnetionManager}) which can be used both to wait
+        for incoming messages (raw data) and to send messages to the client. 
+      \end{enumerate}
+    \end{block}
+    \begin{block}{Client Side}
+      \begin{enumerate}
+        \item You execute a task whose goal is to connect to the server
+        \begin{itemize}
+          \item The instance of the socket on which to attempt to connect to the
+          server can be obtained using the
+          \codeB{createRfcommSocketToServiceRecord()} function to which the UUID
+          shared with the server is passed.         
+          \item This functionality is provided by any instance of
+          \codeB{BluetoothDevice}
+          \item The \codeB{BluetoothDevice} associated with the server can be
+          taken from the paired list
+        \end{itemize}
+        \item If the connection is successful, the client-side connection is
+        managed by the same \codeA{ConnectionManager} present in the server.
+      \end{enumerate}
+    \end{block}
+  \end{frame}
+
+  \begin{frame}{UUID -- Universal Unique Identifier}
+    \begin{block}{Overview}
+      \begin{itemize}
+        \item Used to uniquely identify the communication channel.
+        \item It can be obtained by applying a standard algorithm
+        \begin{itemize}
+          \item The algorithm convert a UUID string to a specific 128-bit value.
+        \end{itemize}
+        \item As in Java, you can use the \codeB{fromString(String rep)} utility
+        function provided by the \codeB{java.util.UUID} class.
+        \begin{itemize}
+          \item This representation can be obtained using the \codeB{randomUUID()}
+          method provided by the same class.
+          \item There are several generators that can be used online (eg
+          \texttt{\url{www.uuidgenerator.net}}).
+        \end{itemize}
+        \item Client and Server must share the same UUID in order to communicate.
+      \end{itemize}
+    \end{block}
+  \end{frame}
+
+  \begin{frame}{UUID for Embedded Devices}
+    \begin{block}{Conventional UUID}
+      \begin{itemize}\itemsep10pt
+        \item For all devices for which it is not possible to make an explicit
+        paring (i.e. confirming the shared code on both devices), the UUID to be
+        used is established by convention.
+        \item This is true for almost all embedded devices, unless their UUID
+        has been explicitly changed. 
+      \end{itemize}
+    \end{block}
+    \begin{block}{UUID standard}
+      \centering\codeA{00001101-0000-1000-8000-00805F9B34FB}
+    \end{block}
+  \end{frame}
+
+  \subsection{Implementation Example}
+    \begin{frame}{Implementation Example}
+      \begin{center}
+        \emph{See the AndroidBluetoothEx example provided.}
+      \end{center}
+    \end{frame}
+
+%\begin{frame}[fragile,allowframebreaks]{Canale di Comunicazione -- Implementazione}
+%\begin{exampleblock}{MasterThread (lato server)}
+%\begin{lstlisting}[language=Java]
+%public class MasterThread extends Thread{
+%
+%  private BluetoothAdapter btAdapter;
+%  private BluetoothServerSocket serverSocket = null;
+%
+%  private boolean connectionAccepted = false;
+%  private boolean stop = false;
+%
+%  public MasterThread(UUID uuid, String name){
+%    btAdapter = BluetoothAdapter.getDefaultAdapter();
+%
+%    try{
+%      serverSocket = btAdapter.listenUsingRfcommWithServiceRecord(name, uuid);
+%    } catch (IOException e) {  /* ... */ }
+%  }
+%\end{lstlisting}
+%\end{exampleblock}		
+%\begin{exampleblock}{\vspace{-10pt}}
+%\begin{lstlisting}[language=Java]
+%  public void run(){
+%    BluetoothSocket socket = null;
+%
+%    while(!connectionAccepted && !stop){
+%      try{
+%        socket = serverSocket.accept();
+%      } catch(IOException e){ stop = true; }
+%
+%      if(socket != null){
+%        connectionAccepted = true;
+%
+%        ConnectionManager cm = ConnectionManager.getInstance();
+%        cm.setChannel(socket);
+%        cm.start();
+%
+%        try {
+%          serverSocket.close();
+%        } catch (IOException e) { /* ... */ }
+%\end{lstlisting}
+%\end{exampleblock}		
+%\begin{exampleblock}{\vspace{-10pt}}
+%\begin{lstlisting}[language=Java]
+%      }
+%    }
+%  }
+%}
+%\end{lstlisting}
+%\end{exampleblock}
+%
+%\begin{exampleblock}{ConnectionTask (lato client)}
+%\begin{lstlisting}[language=Java]
+%public class ConnectionTask extends AsyncTask<Void, Void, Void>{
+%
+%  private BluetoothSocket btSocket = null;
+%
+%  public ConnectionTask(BluetoothDevice server, UUID uuid){
+%    try {
+%      btSocket = server.createRfcommSocketToServiceRecord(uuid);
+%    } catch(IOException e){ /* ... */ }
+%  }
+%\end{lstlisting}
+%\end{exampleblock}		
+%\begin{exampleblock}{\vspace{-10pt}}
+%\begin{lstlisting}[language=Java]
+%  @Override
+%  protected Void doInBackground(Void... params){
+%    try{ btSocket.connect(); }
+%    catch(IOException connectException){
+%        try{ btSocket.close(); }
+%        catch(IOException closeException){ /* ... */ }
+%        return null;
+%    }
+%
+%    ConnectionManager cm = ConnectionManager.getInstance();
+%    cm.setChannel(btSocket);
+%    cm.start();
+%    return null;
+%  }
+%  
+%  @Override
+%  protected void onPostExecute(Void par){ /* Connection active */ }
+%}
+%\end{lstlisting}
+%\end{exampleblock}
+%
+%\begin{exampleblock}{ConnectionManager (lato server e lato client)}
+%\begin{lstlisting}[language=Java]
+%public class ConnectionManager extends Thread{
+%
+%  private BluetoothSocket btSocket;
+%  private InputStream btInStream;
+%  private OutputStream btOutStream;
+%
+%  private boolean stop;
+%
+%  private static ConnectionManager instance = null;
+%\end{lstlisting}
+%\end{exampleblock}		
+%\begin{exampleblock}{\vspace{-10pt}}
+%\begin{lstlisting}[language=Java]
+%  private ConnectionManager(){
+%    stop = true;
+%  }
+%  
+%  public static ConnectionManager getInstance(){
+%    if(instance == null)
+%      instance = new ConnectionManager();
+%    return instance;
+%  }
+%
+%  public void setChannel(BluetoothSocket socket){
+%    btSocket = socket;
+%
+%    try {
+%      btInStream = socket.getInputStream();
+%      btOutStream = socket.getOutputStream();
+%    } catch(IOException e) { /*...*/ }
+%\end{lstlisting}
+%\end{exampleblock}		
+%\begin{exampleblock}{\vspace{-10pt}}
+%\begin{lstlisting}[language=Java]
+%    stop = false;
+%  }
+%
+%  public void run() {
+%    byte[] buffer = new byte[1024];
+%    int nBytes = 0;
+%
+%    while(!stop){
+%      try {
+%        nBytes = btInStream.read(buffer);
+%
+%        /* Manage here the data stored in buffer  */
+%        
+%      } catch (IOException e) { stop = true; }
+%    }
+%  }
+%\end{lstlisting}
+%\end{exampleblock}		
+%\begin{exampleblock}{\vspace{-10pt}}
+%\begin{lstlisting}[language=Java]
+%  public boolean write(byte[] bytes){
+%    if(btOutStream == null) return false;
+%
+%    try{
+%      btOutStream.write(bytes);
+%    } catch(IOException e){ return false; }
+%
+%    return true;
+%  }
+%
+%  public void cancel(){
+%    try{
+%      btSocket.close();
+%    } catch(IOException e){ /*...*/ }
+%  }
+%}
+%\end{lstlisting}
+%\end{exampleblock}
+%
+%\vspace{20pt}
+%
+%\begin{exampleblock}{Esempio -- Server App}
+%\begin{lstlisting}[language=Java]
+%public class ServerMainActivity extends Activity{
+%
+%  private static final String APP_UUID = "c4daba7b-14c1-4cc1-b117-87ff24b9f21d";
+%
+%  private BluetoothAdapter btAdapter;
+%	
+%  @Override
+%  protected void onCreate(Bundle savedInstanceState){
+%    super.onCreate(savedInstanceState);
+%	setContentView(/*...*/);
+%		
+%	btAdapter = BluetoothAdapter.getDefaultAdapter();	
+%		
+%	/* Initialize BT ... */	
+%  }
+%\end{lstlisting}
+%\end{exampleblock}		
+%\begin{exampleblock}{\vspace{-10pt}}
+%\begin{lstlisting}[language=Java]	
+%  public void onStart(){
+%    super.onStart();
+%    
+%    UUID uuid = UUID.fromString(APP_UUID);
+%    MasterThread th = new MasterThread(uuid, "MyBTApp");
+%    th.start();
+%  }
+%  
+%  public void onDestroy(){
+%    super.onDestroy();
+%    ConnectionManager.getInstance().cancel();
+%  }
+%  
+%  private void sendMessage(String msg){
+%    ConnectionManager.getInstance().write(msg.getBytes());
+%  }
+%}
+%
+%\end{lstlisting}
+%\end{exampleblock}
+%
+%\begin{exampleblock}{Esempio -- Client App}
+%\begin{lstlisting}[language=Java]
+%public class ClientMainActivity extends Activity {
+%
+%  private BluetoothAdapter btAdapter;
+%  private BluetoothDevice btServer;
+%  
+%  private static final String BT_SERVER_NAME = "ServerDevice";
+%  private static final String APP_UUID = "c4daba7b-14c1-4cc1-b117-87ff24b9f21d";
+%
+%  @Override
+%  protected void onCreate(Bundle savedInstanceState) {
+%    super.onCreate(savedInstanceState);
+%    setContentView(/*...*/);
+%
+%    btAdapter = BluetoothAdapter.getDefaultAdapter();
+%	
+%    /* Initialize BT ... */
+%\end{lstlisting}
+%\end{exampleblock}		
+%\begin{exampleblock}{\vspace{-10pt}}
+%\begin{lstlisting}[language=Java]
+%    Set<BluetoothDevice> pairedDevices = 
+%      btAdapter.getBondedDevices();
+%
+%    if (pairedDevices.size() > 0)
+%      for (BluetoothDevice device : pairedDevices)
+%        if (device.getName().equals(BT_SERVER_NAME))
+%          btServer = device;
+%  }
+%
+%  @Override
+%  public void onStart() {
+%    super.onStart();
+%
+%    UUID uuid = UUID.fromString(APP_UUID);
+%    new ConnectionTask(btServer, uuid).execute();
+%  }
+%\end{lstlisting}
+%\end{exampleblock}		
+%\begin{exampleblock}{\vspace{-10pt}}
+%\begin{lstlisting}[language=Java]
+%  @Override
+%  public void onDestroy() {
+%   super.onDestroy();
+%   ConnectionManager.getInstance().cancel();
+%  }
+%  
+%  private void sendMessage(String msg){
+%    ConnectionManager.getInstance().write(msg.getBytes());
+%  }
+%}
+%
+%\end{lstlisting}
+%\end{exampleblock}	
+%\end{frame}
+
+%\section{Bluetooth Low Energy}
+%
+%\begin{frame}{Bluetooth Low Energy (BLE)}
+%\begin{itemize}\itemsep10pt
+%\item Le versione 4.0 del protocollo Bluetooth, BLE o ``Bluetooth Smart'', è supportata in Android dalla versione 4.3 del sistema operativo (API Level 18).
+%\item Tra le altre funzionalità, abilita la scansione dei device BLE in Peripheral Mode.
+%\item L'uso del BLE in Android è analogo a quanto detto per lo standard Bluetooth, con alcuni accorgimenti per quanto riguarda la discovery dei dispositivi nelle vicinanze.
+%\end{itemize}
+%\vfill
+%\link{developer.android.com/guide/topics/connectivity/bluetooth-le.html}
+%\end{frame}
+
+
+\section*{References}
+\input{references/seeiot1819-reference-frame}
+
+\end{document}

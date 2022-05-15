@@ -1,0 +1,1 @@
+Handler h = new MyHandler(Looper.getMainLooper(), imageView);

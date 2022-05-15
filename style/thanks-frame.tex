@@ -1,0 +1,16 @@
+\newcommand\blfootnote[1]{%
+  \begingroup
+  \renewcommand\thefootnote{}\footnote{#1}%
+  \addtocounter{footnote}{-1}%
+  \endgroup
+}
+
+\begin{frame}{Thanks}
+    \centering
+    \begin{itemize}
+      \item \large{Professor Angelo Croatti}
+    \end{itemize}
+
+    \blfootnote{\url{https://www.unibo.it/sitoweb/a.croatti/en}}
+    \blfootnote{}
+\end{frame}

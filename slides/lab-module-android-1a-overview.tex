@@ -257,14 +257,14 @@ Android is an operating system designed for use on mobile devices, based on Linu
   \begin{exampleblock}{Example}
     \lstinputlisting[language=Java]{./code/implict-intent-example.java}
   \end{exampleblock}
-  To advertise which implicit intents your app can receive, declare one or more intent filters
+  To define which implicit intents your app can receive, declare one or more intent filters
   for each of your app components with an \codeB{<intent-filter>} element in your manifest file.
   \begin{itemize}
     \item \tcc{<action>}: declares the intent action accepted;
     \item \tcc{<category>}: \textit{implicit intents} need \tcc{DEFAULT} category; 
     \item \tcc{<data>}: declares the type of data accepted;
   \end{itemize}
-  \begin{exampleblock}{Esempio}
+  \begin{exampleblock}{Example}
     \lstinputlisting[language=XML]{./code/intent-filter-example.xml}
   \end{exampleblock}
 \end{frame}

@@ -344,14 +344,14 @@
   \end{frame}
 
 
-  \begin{frame}{Async Task -- Ordine di Esecuzione}
+  \begin{frame}{Async Task -- Execution order}
     \begin{block}{Observations}
       \begin{itemize}
         \item \textbf{All the Async Task created and executed within the same application
         refer to the same WorkerThread}.  
         \begin{itemize}
           \item Eg: \small{If two async tasks are performed within the same
-          application, the doInBackground () method of the second can be
+          application, the \codeA{doInBackground()} method of the second can be
           executed only after the termination of the same method of the first
           task.}
         \end{itemize}
@@ -369,6 +369,39 @@
       \end{itemize}
     \end{block}
   \end{frame}
+
+  \begin{frame}{Async Task -- Last notes}
+    \begin{block}{}
+      AsyncTask is deprecated in API level 30, the officially recommended alternative 
+      is \textbf{Kotlin Coroutines}\footnote{For details: \href{https://developer.android.com/topic/libraries/architecture/coroutines}{developer.android.com/coroutines}}.
+      \begin{itemize}
+        \item An unofficial alternative is to combine \codeB{java.util.concurrent.Executors} class with the \codeA{Handler}.
+      \end{itemize}
+    \end{block}
+    \begin{exampleblock}{}
+      \lstinputlisting[language=Java]{./code/1c-async-task-executor.java}
+    \end{exampleblock}
+  \end{frame}
+
+\section*{Summary}
+  \begin{frame}{Summary}
+    \begin{block}{Comparison}
+      \begin{itemize}
+        \item \tcc{Handler}: you should use it if you are on an \textbf{non-UI thread},
+        and you want to do something with UI.
+        \item \tcc{runOnUiThread}: is a special case of more generic \texttt{Handlers}.
+        \begin{itemize}
+          \item if we are in a UI thread the runnable is executed immediately. 
+          Otherwise, it will post it to the \texttt{Handler}.
+          \item it may reduce the readability of the code.
+        \end{itemize}
+        \item \tcc{AsyncTask}: you should use it when you are on the \textbf{UI Thread} and you want 
+        to run a long-running task (e.g. call a web service).
+      \end{itemize}
+    \end{block}
+  \end{frame}
+
+
 
 \section*{References}
 \input{references/seeiot1819-reference-frame}

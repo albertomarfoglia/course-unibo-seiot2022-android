@@ -1,5 +1,7 @@
 
-  protected void onProgressUpdate(Integer n) { updateDownloadCounter(n); }
+  protected void onProgressUpdate(Integer n) { 
+    updateDownloadCounter(n); 
+  }
 
   protected void onPostExecute(Long bytes) {
     updateTotalBytesDownloadedCounter(bytes);

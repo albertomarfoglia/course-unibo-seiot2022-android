@@ -269,7 +269,6 @@
         \item It's invoked immediately after \codeB{onPreExecute()} is terminated.
         \item It runs in a properly created worker thread.
         \item It receives as input the parameters passed to the \codeA{execute()}
-        \item The result returned by the method is passed as input to the
         \item It can call the \codeA{publishProgress()} to perform minimal
         computation on the Main Thread \codeA{onPostExecute()} method.
       \end{itemize}
@@ -288,7 +287,7 @@
   \begin{frame}{Async Task -- Details III}
     \begin{block}{\codeA{void onPostExecute(Result res)}}
       \begin{itemize}
-        \item It's execute on the Main Thread following the termination of the
+        \item It's executed on the Main Thread following the termination of the
         \codeA{doInBackground()} method
         \item The result returned by \codeA{doInBackground()} is passed as an
         input parameter to the method. 

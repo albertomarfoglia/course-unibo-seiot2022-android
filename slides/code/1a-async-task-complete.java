@@ -1,7 +1,7 @@
 class DownloadFilesTask extends AsyncTask<URL, Integer, Long> {
   private int nFileDownloaded;
 
-  protected void onPreExecute(){
+  protected void onPreExecute() {
     nFileDownloaded = 0;
     setupDownloadManager();
   }

@@ -259,7 +259,7 @@ public class LightSensorListener implements SensorEventListener {
 
   \begin{frame}{Best-practices for using sensors}
     \begin{itemize}\itemsep20pt
-      \item Always unregister the listeners for the sensors in the onPause ()
+      \item Always unregister the listeners for the sensors in the onPause()
       callback of the activity that uses the sensor.
       \item Do not insert blocking mechanisms into the \codeA{onSensorChanged()}
       function.
@@ -295,15 +295,15 @@ public class LightSensorListener implements SensorEventListener {
 \subsection{Reference System}
   \begin{frame}[allowframebreaks]{Sensor Reference System}
     \begin{itemize}\itemsep10pt
-      \item A three-axis (X, Y, Z) SR-based coordinate system is used.
+      \item A three-axes (X, Y, Z) SR-based coordinate system is used.
       \item The SR is defined according to the standard orientation of the
       specific device (\textit{portrait} for most devices).
       \item When the device is in the standard position, the following applies:
       \begin{itemize}
-        \item The X axis is horizontal and its positive axis is defined to the
+        \item The X axes is horizontal and its positive axes is defined to the
         right
-        \item The Y axis is vertical and its positive axis is identified upwards
-        \item The Z axis exits the device screen orthogonally to the other two
+        \item The Y axes is vertical and its positive axes is identified upwards
+        \item The Z axes exits the device screen orthogonally to the other two
         axes with positive direction.
       \end{itemize}
       \item Note that no swapping of the X and Y axes is done when the device is
@@ -311,7 +311,7 @@ public class LightSensorListener implements SensorEventListener {
     \end{itemize}
 
     \begin{figure}
-      \includegraphics[width=0.5\linewidth]{figures/axis_device.png}
+      \includegraphics[width=0.5\linewidth]{figures/axes_device.png}
     \end{figure}
 
     \begin{itemize}\itemsep20pt
@@ -341,7 +341,7 @@ public class LightSensorListener implements SensorEventListener {
         \item In a condition of equilibrium (i.e. the device is placed on a flat
         surface with the screen facing upwards) the acceleration values for the
         X and Y axes are close to zero while the acceleration value along the Z
-        axis is close to the (absolute) value of the acceleration due to gravity
+        axes is close to the (absolute) value of the acceleration due to gravity
         9.81.
       \end{itemize}
     \end{itemize}
@@ -380,7 +380,7 @@ Sensor linear_accelerometer = sm.getDefaultSensor(
 
 \subsection{Gyroscope}
 
-  \begin{frame}[fragile]{Giroscopio}
+  \begin{frame}[fragile]{Gyroscope}
     \begin{itemize}\itemsep10pt
       \item Conceptually, it measures the rotation ($rad / s$) based on the three axes of the device.
       \begin{itemize}
@@ -441,7 +441,7 @@ Sensor gyroscope = sm.getDefaultSensor(
         corresponds to the MIME type \codeA{text/plain}.
       \end{itemize} 
       \item \tcc{ID}, unique (optional) identifier for the record.
-      \item \tcc{Paylaod}, the content of the record that will be read/write by
+      \item \tcc{Payload}, the content of the record that will be read/write by
       the \codeA{initiator}.
     \end{itemize}
   \end{frame}
